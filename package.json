@@ -1,0 +1,26 @@
+{
+  "name": "slack-lite",
+  "version": "1.0.0",
+  "description": "A Slack-lite chat application with real-time messaging",
+  "main": "backend/server.js",
+  "scripts": {
+    "start": "node backend/server.js",
+    "dev": "nodemon backend/server.js",
+    "build": "cd frontend && npm run build",
+    "install-all": "npm install && cd frontend && npm install"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "ws": "^8.14.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "jsonwebtoken": "^9.0.2",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "keywords": ["chat", "websocket", "real-time", "slack"],
+  "author": "Slack-lite Team",
+  "license": "MIT"
+}

@@ -1,0 +1,42 @@
+config:
+  target: 'http://localhost:3001'
+  phases:
+    - duration: 60
+      arrivalRate: 5
+  http:
+    timeout: 10
+
+scenarios:
+  - name: "Chat Load Test"
+    weight: 100
+    flow:
+      - post:
+          url: "/api/login"
+          json:
+            username: "user{{ $randomInt(1, 100) }}"
+          capture:
+            - json: "$.token"
+              as: "token"
+      - get:
+          url: "/api/channels"
+          headers:
+            Authorization: "Bearer {{ token }}"
+      - post:
+          url: "/api/channels"
+          headers:
+            Authorization: "Bearer {{ token }}"
+          json:
+            name: "load-test-{{ $randomInt(1, 1000) }}"
+            createdBy: "user{{ $randomInt(1, 100) }}"
+      - post:
+          url: "/api/publish"
+          headers:
+            Authorization: "Bearer {{ token }}"
+          json:
+            channel: "general"
+            text: "Load test message {{ $randomInt(1, 10000) }}"
+            username: "user{{ $randomInt(1, 100) }}"
+      - get:
+          url: "/health"
+      - get:
+          url: "/metrics"
