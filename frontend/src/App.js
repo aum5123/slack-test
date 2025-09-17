@@ -8,7 +8,7 @@ import { WebSocketProvider, useWebSocket } from './contexts/WebSocketContext';
 import './index.css';
 
 function AppContent() {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated } = useAuth();
 
   if (!isAuthenticated) {
     return <Login />;

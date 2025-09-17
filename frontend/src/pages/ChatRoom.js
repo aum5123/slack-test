@@ -23,26 +23,6 @@ const ChatRoom = () => {
 
   const decodedChannelName = decodeURIComponent(channelName);
 
-  useEffect(() => {
-    fetchChannelInfo();
-    return () => {
-      // Cleanup: unsubscribe from channel when component unmounts
-      unsubscribeFromChannel(decodedChannelName);
-    };
-  }, [decodedChannelName]);
-
-  useEffect(() => {
-    // Subscribe to channel when WebSocket is connected
-    if (isConnected) {
-      subscribeToChannel(decodedChannelName);
-    }
-  }, [isConnected, decodedChannelName]);
-
-  useEffect(() => {
-    // Scroll to bottom when new messages arrive
-    scrollToBottom();
-  }, [messages[decodedChannelName]]);
-
   const fetchChannelInfo = async () => {
     try {
       setLoading(true);
@@ -60,6 +40,26 @@ const ChatRoom = () => {
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
+
+  useEffect(() => {
+    fetchChannelInfo();
+    return () => {
+      // Cleanup: unsubscribe from channel when component unmounts
+      unsubscribeFromChannel(decodedChannelName);
+    };
+  }, [decodedChannelName, unsubscribeFromChannel]);
+
+  useEffect(() => {
+    // Subscribe to channel when WebSocket is connected
+    if (isConnected) {
+      subscribeToChannel(decodedChannelName);
+    }
+  }, [isConnected, decodedChannelName, subscribeToChannel]);
+
+  useEffect(() => {
+    // Scroll to bottom when new messages arrive
+    scrollToBottom();
+  }, [messages, decodedChannelName]);
 
   const handleSendMessage = async (e) => {
     e.preventDefault();

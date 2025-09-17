@@ -218,23 +218,22 @@ export const WebSocketProvider = ({ children }) => {
     // This method is mainly for logging and future use
   };
 
-  const ping = () => {
-    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-      wsRef.current.send(JSON.stringify({ type: 'ping' }));
-    }
-  };
 
   useEffect(() => {
     connect();
 
     // Ping every 30 seconds to keep connection alive
-    const pingInterval = setInterval(ping, 30000);
+    const pingInterval = setInterval(() => {
+      if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+        wsRef.current.send(JSON.stringify({ type: 'ping' }));
+      }
+    }, 30000);
 
     return () => {
       clearInterval(pingInterval);
       disconnect();
     };
-  }, []);
+  }, [connect, disconnect]);
 
   const value = {
     ws,

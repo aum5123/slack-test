@@ -47,7 +47,7 @@ const ChannelList = () => {
       setError('');
       setSuccess('');
       
-      const response = await apiService.createChannel(newChannelName.trim(), user.username);
+      await apiService.createChannel(newChannelName.trim(), user.username);
       
       setSuccess(`Channel '${newChannelName}' created successfully`);
       setNewChannelName('');
