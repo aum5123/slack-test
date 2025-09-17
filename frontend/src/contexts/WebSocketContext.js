@@ -39,14 +39,57 @@ export const WebSocketProvider = ({ children }) => {
       
       // Re-subscribe to active channels
       activeChannels.forEach(channel => {
-        subscribeToChannel(channel);
+        const username = localStorage.getItem('username');
+        if (username) {
+          newWs.send(JSON.stringify({
+            type: 'subscribe',
+            channel: channel,
+            username: username
+          }));
+        }
       });
     };
 
     newWs.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
-        handleMessage(data);
+        switch (data.type) {
+          case 'subscribed':
+            console.log(`Subscribed to channel: ${data.channel}`);
+            break;
+            
+          case 'unsubscribed':
+            console.log(`Unsubscribed from channel: ${data.channel}`);
+            break;
+            
+          case 'messages':
+            setMessages(prev => ({
+              ...prev,
+              [data.channel]: data.messages
+            }));
+            break;
+            
+          case 'new_message':
+            setMessages(prev => ({
+              ...prev,
+              [data.message.channel]: [
+                ...(prev[data.message.channel] || []),
+                data.message
+              ]
+            }));
+            break;
+            
+          case 'pong':
+            // Heartbeat response
+            break;
+            
+          case 'error':
+            console.error('WebSocket error:', data.message);
+            break;
+            
+          default:
+            console.log('Unknown message type:', data.type);
+        }
       } catch (error) {
         console.error('Error parsing WebSocket message:', error);
       }
@@ -75,7 +118,7 @@ export const WebSocketProvider = ({ children }) => {
     newWs.onerror = (error) => {
       console.error('WebSocket error:', error);
     };
-  }, [activeChannels, subscribeToChannel, handleMessage]);
+  }, [activeChannels]);
 
   const disconnect = useCallback(() => {
     if (reconnectTimeoutRef.current) {
@@ -94,47 +137,8 @@ export const WebSocketProvider = ({ children }) => {
     setMessages({});
   }, []);
 
-  const handleMessage = (data) => {
-    switch (data.type) {
-      case 'subscribed':
-        console.log(`Subscribed to channel: ${data.channel}`);
-        break;
-        
-      case 'unsubscribed':
-        console.log(`Unsubscribed from channel: ${data.channel}`);
-        break;
-        
-      case 'messages':
-        setMessages(prev => ({
-          ...prev,
-          [data.channel]: data.messages
-        }));
-        break;
-        
-      case 'new_message':
-        setMessages(prev => ({
-          ...prev,
-          [data.message.channel]: [
-            ...(prev[data.message.channel] || []),
-            data.message
-          ]
-        }));
-        break;
-        
-      case 'pong':
-        // Heartbeat response
-        break;
-        
-      case 'error':
-        console.error('WebSocket error:', data.message);
-        break;
-        
-      default:
-        console.log('Unknown message type:', data.type);
-    }
-  };
 
-  const subscribeToChannel = (channelName) => {
+  const subscribeToChannel = useCallback((channelName) => {
     if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {
       console.error('WebSocket not connected');
       return;
@@ -153,7 +157,7 @@ export const WebSocketProvider = ({ children }) => {
     }));
 
     setActiveChannels(prev => new Set([...prev, channelName]));
-  };
+  }, []);
 
   const unsubscribeFromChannel = (channelName) => {
     if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {

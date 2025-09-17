@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useWebSocket } from '../contexts/WebSocketContext';
@@ -23,7 +23,7 @@ const ChatRoom = () => {
 
   const decodedChannelName = decodeURIComponent(channelName);
 
-  const fetchChannelInfo = async () => {
+  const fetchChannelInfo = useCallback(async () => {
     try {
       setLoading(true);
       const response = await apiService.getChannelInfo(decodedChannelName);
@@ -35,7 +35,7 @@ const ChatRoom = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [decodedChannelName]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
