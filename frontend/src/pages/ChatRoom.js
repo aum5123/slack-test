@@ -47,7 +47,7 @@ const ChatRoom = () => {
       // Cleanup: unsubscribe from channel when component unmounts
       unsubscribeFromChannel(decodedChannelName);
     };
-  }, [decodedChannelName, unsubscribeFromChannel]);
+  }, [decodedChannelName, fetchChannelInfo, unsubscribeFromChannel]);
 
   useEffect(() => {
     // Subscribe to channel when WebSocket is connected

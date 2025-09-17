@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
 
 const WebSocketContext = createContext();
 
@@ -20,7 +20,7 @@ export const WebSocketProvider = ({ children }) => {
   const reconnectAttempts = useRef(0);
   const maxReconnectAttempts = 5;
 
-  const connect = () => {
+  const connect = useCallback(() => {
     if (wsRef.current?.readyState === WebSocket.OPEN) {
       return;
     }
@@ -75,9 +75,9 @@ export const WebSocketProvider = ({ children }) => {
     newWs.onerror = (error) => {
       console.error('WebSocket error:', error);
     };
-  };
+  }, [activeChannels, subscribeToChannel, handleMessage]);
 
-  const disconnect = () => {
+  const disconnect = useCallback(() => {
     if (reconnectTimeoutRef.current) {
       clearTimeout(reconnectTimeoutRef.current);
       reconnectTimeoutRef.current = null;
@@ -92,7 +92,7 @@ export const WebSocketProvider = ({ children }) => {
     setWs(null);
     setActiveChannels(new Set());
     setMessages({});
-  };
+  }, []);
 
   const handleMessage = (data) => {
     switch (data.type) {
